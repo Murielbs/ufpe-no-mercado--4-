@@ -33,7 +33,7 @@ export default function App() {
     setPhase("attract");
   }, []);
 
-  // volta para a tela de atraÃ§Ã£o apÃ³s 2 min sem toque (exceto com vÃ­deo tocando)
+  // volta para a tela de atração após 2 min sem toque (exceto com vídeo tocando)
   useIdle(IDLE_MS, reset, phase !== "attract" && !videoPlaying);
   useFitToScreen(shellRef, [phase, index], phase === "video");
 

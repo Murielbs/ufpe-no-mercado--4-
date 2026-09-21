@@ -1,8 +1,8 @@
 # UFPE no Mercado (React + TypeScript)
 
 Totem/quiz que **sugere** vagas do Grupo Moura a partir do perfil do participante.
-O resultado é sempre uma sugestão: a tela e o e-mail avisam que não garante seleção
-e que a vaga pode ser encerrada.
+O resultado é sempre uma sugestão: a tela avisa que não garante seleção e que a vaga
+pode ser encerrada.
 
 ## Como rodar
 ```bash
@@ -27,12 +27,6 @@ em uma hospedagem local.
 - `Imagem2.png` (logo)
 - `image_1657a3.jpg` (mascote)
 - `A_interprete_deve_estar_faland.mp4` (vídeo)
-
-## E-mail
-Copie `.env.example` para `.env` e coloque a URL do Google Apps Script em `VITE_EMAIL_ENDPOINT`.
-Deixe vazio para desativar o envio.
-O envio inclui o campo `aviso` (texto de "é uma sugestão"). Para que apareça no e-mail,
-adicione `body.aviso` ao modelo de e-mail do Apps Script.
 
 ## Como atualizar as vagas
 1. Abra `src/vagas-lista.ts`.

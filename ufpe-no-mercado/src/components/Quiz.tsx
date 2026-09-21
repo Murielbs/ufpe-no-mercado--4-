@@ -30,31 +30,6 @@ export function Quiz({ step, answers, setAnswer, isLast, onNext, onBack }: Props
     <form className="card step" onSubmit={submit} noValidate>
       <h2 className="step__title">{step.title}</h2>
 
-      {step.kind === "pessoal" && (
-        <>
-          <div className="field">
-            <label className="field__label" htmlFor="nome">Seu nome completo</label>
-            <input
-              id="nome" className="input" type="text" autoComplete="name" enterKeyHint="next"
-              placeholder="Digite seu nome completo"
-              value={answers.nome} onChange={(e) => setAnswer("nome", e.target.value)}
-            />
-          </div>
-          <div className="field">
-            <label className="field__label" htmlFor="email">Seu e-mail</label>
-            <input
-              id="email" className="input" type="email" inputMode="email" autoComplete="email" enterKeyHint="next"
-              placeholder="seu@email.com"
-              value={answers.email} onChange={(e) => setAnswer("email", e.target.value)}
-            />
-          </div>
-          <p className="consent">
-            Enviaremos a sugestÃ£o de vaga para este e-mail ao final. Ao continuar, vocÃª autoriza o Grupo Moura a usar
-            seu e-mail para enviar esta vaga e contatos sobre oportunidades.
-          </p>
-        </>
-      )}
-
       {step.kind === "choice" && (
         <div className={`choices choices--${step.layout}`} role="radiogroup" aria-label={step.title}>
           {step.options.map((o) => {
@@ -83,17 +58,6 @@ export function Quiz({ step, answers, setAnswer, isLast, onNext, onBack }: Props
               </button>
             );
           })}
-        </div>
-      )}
-
-      {step.kind === "text" && (
-        <div className="field">
-          <label className="field__label visually-hidden" htmlFor="instituicao">{step.title}</label>
-          <input
-            id="instituicao" className="input" type="text" enterKeyHint="next"
-            placeholder={step.placeholder}
-            value={answers.instituicao} onChange={(e) => setAnswer("instituicao", e.target.value)}
-          />
         </div>
       )}
 

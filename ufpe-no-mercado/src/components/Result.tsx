@@ -1,73 +1,26 @@
-﻿import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useMemo } from "react";
 import { QRCodeSVG } from "qrcode.react";
-import { AVISO_SUGESTAO, BUSCA_LABEL, EMAIL_ENDPOINT, JOVEM_NOTA, PORTAL_VAGAS } from "../data";
+import { AVISO_SUGESTAO, JOVEM_NOTA, PORTAL_VAGAS } from "../data";
 import { recommend } from "../recommend";
 import type { Answers } from "../types";
-import { EMAIL_RE, firstName, shortUrl } from "../utils";
+import { shortUrl } from "../utils";
 
 interface Props {
   answers: Answers;
   onRestart: () => void;
 }
 
-type EmailStatus = "idle" | "sending" | "sent" | "error";
-
 const QR_COLOR = "#14213F";
 
 export function Result({ answers, onRestart }: Props) {
   const rec = useMemo(() => recommend(answers), [answers]);
-  const [status, setStatus] = useState<EmailStatus>("idle");
-  const autoSent = useRef(false);
-
-  const email = answers.email.trim();
-  const canEmail = EMAIL_ENDPOINT !== "" && EMAIL_RE.test(email);
-  const nome = firstName(answers.nome) || "participante";
-
-  const send = useCallback(async () => {
-    setStatus("sending");
-    try {
-      await fetch(EMAIL_ENDPOINT, {
-        method: "POST",
-        mode: "no-cors", // o Apps Script nÃ£o devolve resposta legÃ­vel ao navegador
-        headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify({
-          nome: answers.nome,
-          email,
-          curso: answers.curso,
-          periodo: answers.periodo,
-          escolaridade: answers.escolaridade,
-          instituicao: answers.instituicao,
-          cidade: answers.cidade,
-          uf: answers.uf,
-          busca: answers.busca ? BUSCA_LABEL[answers.busca] : "",
-          area: rec.areaLabel ?? "",
-          outrasVagas: rec.relacionadas.map((r) => ({ titulo: r.vaga.titulo, url: r.vaga.url })),
-          aviso: AVISO_SUGESTAO,
-          vagaTitulo: rec.principal.titulo,
-          vagaUrl: rec.principal.url,
-          portalUrl: PORTAL_VAGAS,
-        }),
-      });
-      setStatus("sent");
-    } catch {
-      setStatus("error");
-    }
-  }, [answers, email, rec]);
-
-  // envio automÃ¡tico (a trava evita e-mail duplicado no StrictMode)
-  useEffect(() => {
-    if (canEmail && !autoSent.current) {
-      autoSent.current = true;
-      void send();
-    }
-  }, [canEmail, send]);
 
   return (
     <div className="card step result">
       <div className="result__main">
         <div className="result__text">
           <div className="pills">
-            <span className="pill">{rec.tipo === "vaga" ? "SugestÃ£o de vaga" : "Portal de vagas"}</span>
+            <span className="pill">{rec.tipo === "vaga" ? "Sugestão de vaga" : "Portal de vagas"}</span>
             {rec.nivelLabel && <span className="pill pill--blue">{rec.nivelLabel}</span>}
             {rec.areaLabel && <span className="pill pill--blue">{rec.areaLabel}</span>}
           </div>
@@ -86,8 +39,8 @@ export function Result({ answers, onRestart }: Props) {
             <img src="./image_1657a3.jpg" alt="Mascote Moura" onError={(e) => (e.currentTarget.style.display = "none")} />
             <p>
               {rec.tipo === "vaga"
-                ? `${nome}, esta Ã© uma sugestÃ£o de vaga para o seu perfil. Escaneie para conhecer os detalhes e, se fizer sentido, se inscrever.`
-                : `${nome}, escaneie para conhecer todas as vagas abertas.`}
+                ? "Esta é uma sugestão de vaga para o seu perfil. Escaneie para conhecer os detalhes e, se fizer sentido, se inscrever."
+                : "Escaneie para conhecer todas as vagas abertas."}
             </p>
           </div>
         </div>
@@ -96,7 +49,7 @@ export function Result({ answers, onRestart }: Props) {
           <div className="qr-frame">
             <QRCodeSVG value={rec.principal.url} size={256} level="M" fgColor={QR_COLOR} bgColor="#ffffff" />
           </div>
-          <div className="qr-hint">Aponte a cÃ¢mera do celular</div>
+          <div className="qr-hint">Aponte a câmera do celular</div>
           <div className="link-box">{shortUrl(rec.principal.url)}</div>
           {rec.principal.niveis.includes("jovem") && <div className="qr-note">{JOVEM_NOTA}</div>}
           {rec.principal.tipo === "busca" && rec.tipo === "vaga" && (
@@ -107,30 +60,15 @@ export function Result({ answers, onRestart }: Props) {
 
       {rec.tipo === "vaga" && (
         <p className="aviso" role="note">
-          <strong>Ã‰ uma sugestÃ£o.</strong> {AVISO_SUGESTAO}
+          <strong>É uma sugestão.</strong> {AVISO_SUGESTAO}
         </p>
-      )}
-
-      {canEmail && (
-        <div className={`email-status is-${status}`} aria-live="polite">
-          {status === "sending" && <>Enviando a vaga para {email}â€¦</>}
-          {status === "sent" && <>âœ“ Enviamos a vaga para {email}. Confira tambÃ©m o spam.</>}
-          {status === "error" && (
-            <>
-              NÃ£o foi possÃ­vel enviar o e-mail agora. Use o QR code acima.
-              <button type="button" className="btn btn--link" onClick={() => void send()}>
-                Tentar de novo
-              </button>
-            </>
-          )}
-        </div>
       )}
 
       {rec.relacionadas.length > 0 && (
         <section className="related">
-          <h3 className="related__title">Outras sugestÃµes para vocÃª</h3>
+          <h3 className="related__title">Outras sugestões para você</h3>
           <p className="related__sub">
-            Encontramos {rec.total} sugestÃµes compatÃ­veis com as suas respostas. Estas sÃ£o as mais prÃ³ximas do seu perfil.
+            Encontramos {rec.total} sugestões compatíveis com as suas respostas. Estas são as mais próximas do seu perfil.
           </p>
           <div className="related__grid">
             {rec.relacionadas.map((r) => (

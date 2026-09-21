@@ -62,7 +62,7 @@ export function CheckIcon() {
   );
 }
 
-/** Bateria grande com cÃ©lulas que acendem em sequÃªncia (splash e tela de atraÃ§Ã£o). */
+/** Bateria grande com células que acendem em sequência (splash e tela de atração). */
 export function BatteryArt({ className }: { className?: string }) {
   return (
     <svg className={className} viewBox="0 0 300 130" aria-hidden="true">

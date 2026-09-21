@@ -3,7 +3,7 @@
   total: number;
 }
 
-/** Progresso em forma de bateria: cada pergunta respondida acende uma cÃ©lula. */
+/** Progresso em forma de bateria: cada pergunta respondida acende uma célula. */
 export function BatteryProgress({ done, total }: Props) {
   const pct = Math.round((done / total) * 100);
   const full = done >= total;

@@ -1,11 +1,6 @@
-import type { Answers, AreaKey, BuscaKey, NivelKey, Option, Step } from "./types";
+import type { Answers, AreaKey, NivelKey, Option, Step } from "./types";
 
 export const PORTAL_VAGAS = "https://grupomoura.gupy.io/";
-
-/** URL do Google Apps Script. Defina VITE_EMAIL_ENDPOINT no .env (vazio = desativa o e-mail). */
-export const EMAIL_ENDPOINT: string =
-  import.meta.env.VITE_EMAIL_ENDPOINT ??
-  "https://script.google.com/macros/s/AKfycbxTeS3bIbVtthU2bJdEeFE1WC1SPkdaJHhstIEuaflG1tAvRCgnXxKP4ALDpIgbm-NJ/exec";
 
 /** Reinicia sozinho após 2 min sem toque (totem/TV de evento). */
 export const IDLE_MS = 120_000;
@@ -17,14 +12,6 @@ export const NIVEL_LABEL: Record<NivelKey, string> = {
   estagio: "Estágio",
   primeiro: "Primeiro emprego",
   efetivo: "Vaga efetiva",
-};
-
-export const BUSCA_LABEL: Record<BuscaKey, string> = {
-  jovem: "Jovem Aprendiz",
-  estagio: "Estágio",
-  primeiro: "Primeiro emprego (nível operacional/administrativo)",
-  efetivo: "Oportunidade efetiva (cargo profissional/técnico)",
-  conhecer: "Quero apenas conhecer as oportunidades disponíveis",
 };
 
 export const AREA_LABEL: Record<AreaKey, string> = {
@@ -41,7 +28,7 @@ export const AREA_LABEL: Record<AreaKey, string> = {
 export const JOVEM_NOTA =
   "Jovem Aprendiz: idade entre 18 e 21 anos e 9 meses, ensino médio concluído ou em andamento.";
 
-/** Aviso exibido no resultado (e enviado no e-mail): o teste sugere, não garante. */
+/** Aviso exibido no resultado: o teste sugere, não garante. */
 export const AVISO_SUGESTAO =
   "As vagas indicadas são sugestões baseadas nas suas respostas: não garantem seleção e podem ser encerradas a qualquer momento. Confira os requisitos e a disponibilidade na página da vaga.";
 
@@ -58,7 +45,6 @@ export const ESTADOS_BR = [
 const simple = (labels: string[]): Option[] => labels.map((l) => ({ value: l, label: l }));
 
 export const STEPS: Step[] = [
-  { id: "pessoal", kind: "pessoal", title: "Vamos começar! Qual é o seu nome e e-mail?" },
   {
     id: "escolaridade",
     kind: "choice",
@@ -99,7 +85,6 @@ export const STEPS: Step[] = [
       "Já concluí / não faço curso superior ou técnico",
     ]),
   },
-  { id: "instituicao", kind: "text", title: "Onde você cursa ou cursou seus estudos?", placeholder: "Nome da faculdade, escola ou instituição" },
   { id: "local", kind: "local", title: "Onde você mora atualmente?" },
   {
     id: "busca",
@@ -134,12 +119,9 @@ export const STEPS: Step[] = [
 ];
 
 export const INITIAL_ANSWERS: Answers = {
-  nome: "",
-  email: "",
   escolaridade: "",
   curso: "",
   periodo: "",
-  instituicao: "",
   uf: "",
   cidade: "",
   busca: "",

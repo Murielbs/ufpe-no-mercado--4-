@@ -40,12 +40,9 @@ export interface Vaga {
 }
 
 export interface Answers {
-  nome: string;
-  email: string;
   escolaridade: string;
   curso: string;
   periodo: string;
-  instituicao: string;
   uf: string;
   cidade: string;
   busca: BuscaKey | "";
@@ -62,7 +59,6 @@ export interface Option {
 }
 
 export type Step =
-  | { id: "pessoal"; kind: "pessoal"; title: string }
   | {
       id: ChoiceField;
       kind: "choice";
@@ -71,7 +67,6 @@ export type Step =
       layout: "list" | "grid" | "chips" | "cards";
       options: Option[];
     }
-  | { id: "instituicao"; kind: "text"; title: string; placeholder: string }
   | { id: "local"; kind: "local"; title: string };
 
 export interface Match {
