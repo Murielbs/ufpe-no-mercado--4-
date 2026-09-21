@@ -42,14 +42,13 @@ export interface Vaga {
 export interface Answers {
   escolaridade: string;
   curso: string;
-  periodo: string;
   uf: string;
   cidade: string;
   busca: BuscaKey | "";
   area: AreaKey | "";
 }
 
-export type ChoiceField = "escolaridade" | "curso" | "periodo" | "busca" | "area";
+export type ChoiceField = "escolaridade" | "curso" | "busca" | "area";
 
 export interface Option {
   value: string;

@@ -26,7 +26,7 @@ em uma hospedagem local.
 ## Arquivos que você precisa copiar para a pasta `public/`
 - `Imagem2.png` (logo)
 - `image_1657a3.jpg` (mascote)
-- `A_interprete_deve_estar_faland.mp4` (vídeo)
+- `Novo_video.mp4` (vídeo)
 
 ## Como atualizar as vagas
 1. Abra `src/vagas-lista.ts`.
@@ -43,8 +43,9 @@ corrija em `AJUSTES` pelo número da vaga.
 ## Onde mexer
 - `src/vagas-lista.ts` — lista bruta de vagas (colar aqui a exportação do Gupy)
 - `src/vagas.ts` — leitura da lista, `REGRAS` de classificação e `AJUSTES` pontuais
-- `src/recommend.ts` — pontuação que escolhe a sugestão principal e as 2 seguintes
-  (junta postagens repetidas do mesmo cargo; considera a Grande Recife como "sua região")
+- `src/recommend.ts` — filtra nível, área, formação e local antes de ordenar a sugestão
+  principal e as 2 seguintes. Se não houver combinação válida, mostra o portal em vez de
+  forçar uma vaga incompatível (considera a Grande Recife como "sua região")
 - `src/data.ts` — perguntas, textos, aviso de sugestão, tempo de inatividade e nº de vagas extras
 - `src/styles.css` — cores e tipografia (variáveis no topo)
 - `src/components/` — telas (Attract, VideoStep, Quiz, Result…)

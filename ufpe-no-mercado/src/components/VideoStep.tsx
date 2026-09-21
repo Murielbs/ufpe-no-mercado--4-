@@ -16,7 +16,7 @@ export function VideoStep({ onBack, onContinue, onPlayingChange }: Props) {
     <div className="card card--video step">
       <div className="video-frame">
         <video
-          src="./A_interprete_deve_estar_faland.mp4"
+          src="./Novo_video.mp4"
           controls
           autoPlay
           playsInline

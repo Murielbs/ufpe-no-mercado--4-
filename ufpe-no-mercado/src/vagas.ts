@@ -23,6 +23,10 @@ const ADM = "Administração", MEC = "Engenharia Mecânica", PROD = "Engenharia 
 const ELE = "Engenharia Elétrica", ELN = "Engenharia Eletrônica", QUI = "Engenharia Química";
 const AMB = "Engenharia Ambiental", TI = "Tecnologia da Informação", LOG = "Logística";
 const CONT = "Ciências Contábeis", ECO = "Economia", PSI = "Psicologia", RH = "Recursos Humanos";
+const T_ADM = "Técnico em Administração", T_ELE = "Técnico em Eletrotécnica";
+const T_ELN = "Técnico em Eletrônica", T_MEC = "Técnico em Mecânica";
+const T_MECAT = "Técnico em Mecatrônica", T_QUI = "Técnico em Química";
+const T_LOG = "Técnico em Logística", T_SEG = "Técnico em Segurança do Trabalho";
 
 const UF_NOME: Record<string, string> = {
   AC: "Acre", AL: "Alagoas", AP: "Amapá", AM: "Amazonas", BA: "Bahia", CE: "Ceará",
@@ -46,12 +50,12 @@ const REGRAS: Regra[] = [
   [/jovem aprendiz.*assistencia tecnica/, ["comercial", "operacional"], []],
   [/jovem aprendiz.*experiencia do cliente/, ["comercial"], []],
   // Técnico / fábrica
-  [/seguranca do trabalho/, ["operacional", "engenharia"], [AMB, PROD]],
-  [/manutencao eletrica|eletrotecnica|mecatronica/, ["operacional", "engenharia"], [ELE, ELN, MEC]],
-  [/manutencao mecanica/, ["operacional", "engenharia"], [MEC]],
-  [/^estagio tecnico$/, ["operacional"], [MEC, ELE, ELN, QUI, PROD]],
-  [/assistente tecnico|auxiliar tecnico|lider tecnico|assistencia tecnica/, ["comercial", "operacional"], [ELE, ELN, MEC]],
-  [/tecnico de garantia|tecnico em produto/, ["operacional", "engenharia"], [QUI, ELE, MEC]],
+  [/seguranca do trabalho/, ["operacional", "engenharia"], [AMB, PROD, T_SEG]],
+  [/manutencao eletrica|eletrotecnica|mecatronica/, ["operacional", "engenharia"], [ELE, ELN, MEC, T_ELE, T_ELN, T_MEC, T_MECAT]],
+  [/manutencao mecanica/, ["operacional", "engenharia"], [MEC, T_MEC, T_MECAT]],
+  [/^estagio tecnico$/, ["operacional"], [MEC, ELE, ELN, QUI, PROD, T_ELE, T_ELN, T_MEC, T_MECAT, T_QUI, T_LOG, T_ADM, T_SEG]],
+  [/assistente tecnico|auxiliar tecnico|lider tecnico|assistencia tecnica/, ["comercial", "operacional"], [ELE, ELN, MEC, T_ELE, T_ELN, T_MEC, T_MECAT]],
+  [/tecnico de garantia|tecnico em produto/, ["operacional", "engenharia"], [QUI, ELE, MEC, T_QUI, T_ELE, T_MEC]],
   // Engenharia
   [/engenharia de produto/, ["engenharia"], [MEC, ELE, ELN, QUI, PROD]],
   [/engenharia de projetos/, ["engenharia"], [MEC, ELE, ELN, PROD]],
@@ -66,18 +70,18 @@ const REGRAS: Regra[] = [
   [/responsabilidade social/, ["rh", "operacional"], [AMB, ADM, PSI]],
   [/atracao e selecao|gestao de pessoas|analista de pessoas|desenvolvimento organizacional/, ["rh"], [PSI, RH, ADM]],
   [/^analista de gestao$/, ["admfin", "rh"], [ADM, PROD, ECO]],
-  [/pcp/, ["operacional", "logistica"], [PROD, LOG, ADM, MEC]],
+  [/pcp/, ["operacional", "logistica"], [PROD, LOG, ADM, MEC, T_LOG, T_ADM, T_MEC]],
   // Administrativo e financeiro
   [/contabil|contabeis/, ["admfin"], [CONT, ADM]],
   [/adm fiscal/, ["admfin"], [CONT, ADM, ECO]],
   [/planejamento financeiro/, ["admfin"], [ADM, CONT, ECO, PROD]],
   [/auditor|gestao financeira|adquirencia/, ["admfin"], [ADM, CONT, ECO]],
-  [/administrativo financeiro|adm financeiro|estagio administrativo|estagio em administracao|auxiliar administrativo/, ["admfin"], [ADM, CONT, ECO]],
+  [/administrativo financeiro|adm financeiro|estagio administrativo|estagio em administracao|auxiliar administrativo/, ["admfin"], [ADM, CONT, ECO, T_ADM]],
   [/secretaria/, ["admfin"], [ADM]],
   // Logística (antes do comercial: "Motorista – Atendimento…" é logística)
   [/supervis.*logistica|encarregado|lider de movimentacao/, ["logistica"], [LOG, PROD, ADM]],
-  [/assistente de logistica/, ["logistica"], [LOG, ADM]],
-  [/logistica|estoque|estoquista/, ["logistica"], [LOG]],
+  [/assistente de logistica/, ["logistica"], [LOG, ADM, T_LOG, T_ADM]],
+  [/logistica|estoque|estoquista/, ["logistica"], [LOG, T_LOG]],
   [/entrega|ajudante|motorista/, ["logistica"], []],
   // Comercial
   [/rentabilidade/, ["comercial", "admfin"], [ADM, ECO, PROD]],
@@ -91,21 +95,21 @@ const REGRAS: Regra[] = [
 function nivelDe(t: string, tipoGupy: string): NivelKey[] {
   if (/jovem aprendiz/.test(t) || tipoGupy === "Aprendiz") return JOVEM; // o título manda mais que o rótulo do Gupy
   if (/estagi/.test(t) || tipoGupy === "Estágio") return EST;
+  if (/^(tecnic[oa]|assistente tecnico|auxiliar tecnico|lider tecnico)/.test(t) || /\bjr\b/.test(t)) return TEC;
   if (/^(assistente|auxiliar|ajudante|operador|motorista|estoquista)/.test(t) || /vendedor/.test(t)) return PRIM;
-  if (/^tecnic[oa]/.test(t) || /\bjr$/.test(t)) return TEC;
   return EFET;
 }
 
 function escolaridadeDe(t: string, niveis: NivelKey[]): Escolaridade {
   if (niveis.includes("jovem")) return "medio";
   if (niveis.includes("estagio")) {
-    return /em administracao|engenharia|inteligencia|adquirencia|atracao|analise de dados|gestao da informacao|responsabilidade social/.test(t)
-      ? "superior"
-      : "tecnico";
+    // Estágios explicitamente técnicos e anúncios genéricos aceitam formação técnica;
+    // as demais especialidades são tratadas como estágio de nível superior.
+    return /tecnic/.test(t) || /^estagio$/.test(t) ? "tecnico" : "superior";
   }
   if (/^(analista|consultor|executivo|auditor|coordenacao)/.test(t)) return "superior";
   if (/^supervis.*vendas/.test(t)) return "medio";
-  if (/^(supervis|lider|encarregado|secretaria|tecnic|assistente tecnico)/.test(t)) return "tecnico";
+  if (/^(supervis|lider|encarregado|secretaria|tecnic|assistente tecnico|auxiliar tecnico)/.test(t)) return "tecnico";
   return "medio";
 }
 
@@ -253,7 +257,7 @@ function montar(l: Linha): Vaga {
   const titulo = ehBanco && !/^Banco de Talentos/.test(base) ? `Banco de Talentos – ${base || "Geral"}` : base;
 
   const t = norm(lp.titulo);
-  const niveis = nivelDe(norm(l.bruto.replace(/^BANCO DE TALENTOS?\s*[|\-–]?\s*/, "")), l.tipoGupy);
+  const niveis = nivelDe(t, l.tipoGupy);
   const regra = REGRAS.find(([re]) => re.test(t));
   const areas = regra?.[1] ?? [];
   const cursos = niveis.includes("jovem") ? [] : regra?.[2] ?? [];

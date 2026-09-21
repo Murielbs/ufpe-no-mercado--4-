@@ -69,20 +69,10 @@ export const STEPS: Step[] = [
     options: simple([
       "Administração", "Engenharia Mecânica", "Engenharia de Produção", "Engenharia Elétrica",
       "Engenharia Eletrônica", "Engenharia Química", "Engenharia Ambiental", "Tecnologia da Informação",
-      "Logística", "Ciências Contábeis", "Economia", "Psicologia", "Recursos Humanos", "Outros", "Nenhum",
-    ]),
-  },
-  {
-    id: "periodo",
-    kind: "choice",
-    field: "periodo",
-    layout: "list",
-    title: "Em qual período da faculdade ou curso você está?",
-    options: simple([
-      "1º ao 3º período (início)",
-      "4º ao 6º período (metade)",
-      "7º período ou mais (reta final)",
-      "Já concluí / não faço curso superior ou técnico",
+      "Logística", "Ciências Contábeis", "Economia", "Psicologia", "Recursos Humanos",
+      "Técnico em Administração", "Técnico em Eletrotécnica", "Técnico em Eletrônica", "Técnico em Mecânica",
+      "Técnico em Mecatrônica", "Técnico em Química", "Técnico em Logística", "Técnico em Segurança do Trabalho",
+      "Outros", "Nenhum",
     ]),
   },
   { id: "local", kind: "local", title: "Onde você mora atualmente?" },
@@ -121,7 +111,6 @@ export const STEPS: Step[] = [
 export const INITIAL_ANSWERS: Answers = {
   escolaridade: "",
   curso: "",
-  periodo: "",
   uf: "",
   cidade: "",
   busca: "",
