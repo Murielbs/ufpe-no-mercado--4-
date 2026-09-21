@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from "react";
+﻿import { useCallback, useRef, useState } from "react";
 import { Attract } from "./components/Attract";
 import { BatteryProgress } from "./components/BatteryProgress";
 import { Quiz } from "./components/Quiz";
@@ -33,7 +33,7 @@ export default function App() {
     setPhase("attract");
   }, []);
 
-  // volta para a tela de atração após 2 min sem toque (exceto com vídeo tocando)
+  // volta para a tela de atraÃ§Ã£o apÃ³s 2 min sem toque (exceto com vÃ­deo tocando)
   useIdle(IDLE_MS, reset, phase !== "attract" && !videoPlaying);
   useFitToScreen(shellRef, [phase, index], phase === "video");
 
@@ -51,7 +51,7 @@ export default function App() {
             <header className="hud">
               <div className="hud__brand">
                 <span className="hud__logo">
-                  <img src="/Imagem2.png" alt="" onError={(e) => (e.currentTarget.style.display = "none")} />
+                  <img src="./Imagem2.png" alt="" onError={(e) => (e.currentTarget.style.display = "none")} />
                 </span>
                 <span className="hud__name">UFPE no Mercado</span>
               </div>
@@ -92,3 +92,4 @@ export default function App() {
     </>
   );
 }
+

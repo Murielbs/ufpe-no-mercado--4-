@@ -1,4 +1,4 @@
-import type { FormEvent } from "react";
+﻿import type { FormEvent } from "react";
 import { ESTADOS_BR } from "../data";
 import type { Answers, SetAnswer, Step } from "../types";
 import { isStepValid } from "../utils";
@@ -49,7 +49,7 @@ export function Quiz({ step, answers, setAnswer, isLast, onNext, onBack }: Props
             />
           </div>
           <p className="consent">
-            Enviaremos a sugestão de vaga para este e-mail ao final. Ao continuar, você autoriza o Grupo Moura a usar
+            Enviaremos a sugestÃ£o de vaga para este e-mail ao final. Ao continuar, vocÃª autoriza o Grupo Moura a usar
             seu e-mail para enviar esta vaga e contatos sobre oportunidades.
           </p>
         </>
@@ -130,3 +130,4 @@ export function Quiz({ step, answers, setAnswer, isLast, onNext, onBack }: Props
     </form>
   );
 }
+

@@ -1,9 +1,9 @@
-interface Props {
+﻿interface Props {
   done: number;
   total: number;
 }
 
-/** Progresso em forma de bateria: cada pergunta respondida acende uma célula. */
+/** Progresso em forma de bateria: cada pergunta respondida acende uma cÃ©lula. */
 export function BatteryProgress({ done, total }: Props) {
   const pct = Math.round((done / total) * 100);
   const full = done >= total;
@@ -40,3 +40,4 @@ export function BatteryProgress({ done, total }: Props) {
     </div>
   );
 }
+

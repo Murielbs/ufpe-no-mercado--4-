@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 
 interface Props {
   onBack: () => void;
@@ -9,14 +9,14 @@ interface Props {
 export function VideoStep({ onBack, onContinue, onPlayingChange }: Props) {
   const [ended, setEnded] = useState(false);
 
-  // ao sair da tela, o vídeo deixa de "segurar" o timer de inatividade
+  // ao sair da tela, o vÃ­deo deixa de "segurar" o timer de inatividade
   useEffect(() => () => onPlayingChange(false), [onPlayingChange]);
 
   return (
     <div className="card card--video step">
       <div className="video-frame">
         <video
-          src="/A_interprete_deve_estar_faland.mp4"
+          src="./A_interprete_deve_estar_faland.mp4"
           controls
           autoPlay
           playsInline
@@ -39,3 +39,4 @@ export function VideoStep({ onBack, onContinue, onPlayingChange }: Props) {
     </div>
   );
 }
+

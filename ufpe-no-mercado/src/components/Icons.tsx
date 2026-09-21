@@ -1,4 +1,4 @@
-import type { ReactElement } from "react";
+﻿import type { ReactElement } from "react";
 import type { AreaKey } from "../types";
 
 const AREA_ICONS: Record<AreaKey, ReactElement> = {
@@ -62,7 +62,7 @@ export function CheckIcon() {
   );
 }
 
-/** Bateria grande com células que acendem em sequência (splash e tela de atração). */
+/** Bateria grande com cÃ©lulas que acendem em sequÃªncia (splash e tela de atraÃ§Ã£o). */
 export function BatteryArt({ className }: { className?: string }) {
   return (
     <svg className={className} viewBox="0 0 300 130" aria-hidden="true">
@@ -83,3 +83,4 @@ export function BatteryArt({ className }: { className?: string }) {
     </svg>
   );
 }
+

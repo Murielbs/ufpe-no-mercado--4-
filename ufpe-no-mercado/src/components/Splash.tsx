@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import { BatteryArt } from "./Icons";
 
 export function Splash({ onDone }: { onDone: () => void }) {
@@ -20,3 +20,4 @@ export function Splash({ onDone }: { onDone: () => void }) {
     </div>
   );
 }
+
