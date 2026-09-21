@@ -85,8 +85,10 @@ export interface Recommendation {
   areaLabel?: string;
   nivelLabel?: string;
   relacionadas: Match[];
-  /** total de vagas compatíveis encontradas */
+  /** total de vagas compatíveis; no portal, total de vagas encontradas na área escolhida */
   total: number;
+  /** total de vagas carregadas no catálogo */
+  catalogTotal: number;
 }
 
 export type SetAnswer = <K extends keyof Answers>(key: K, value: Answers[K]) => void;

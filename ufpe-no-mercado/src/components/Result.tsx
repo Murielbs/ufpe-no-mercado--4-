@@ -50,7 +50,12 @@ export function Result({ answers, onRestart }: Props) {
             <QRCodeSVG value={rec.principal.url} size={256} level="M" fgColor={QR_COLOR} bgColor="#ffffff" />
           </div>
           <div className="qr-hint">Aponte a câmera do celular</div>
-          <div className="link-box">{shortUrl(rec.principal.url)}</div>
+          <a className="link-box" href={rec.principal.url} target="_blank" rel="noreferrer">
+            {shortUrl(rec.principal.url)}
+          </a>
+          {rec.tipo === "portal" && (
+            <div className="qr-note">Este QR code abre o portal com as {rec.catalogTotal} vagas do catálogo.</div>
+          )}
           {rec.principal.niveis.includes("jovem") && <div className="qr-note">{JOVEM_NOTA}</div>}
           {rec.principal.tipo === "busca" && rec.tipo === "vaga" && (
             <div className="qr-note">Abre a busca por esta vaga no portal Gupy.</div>
@@ -66,9 +71,13 @@ export function Result({ answers, onRestart }: Props) {
 
       {rec.relacionadas.length > 0 && (
         <section className="related">
-          <h3 className="related__title">Outras sugestões para você</h3>
+          <h3 className="related__title">
+            {rec.tipo === "portal" ? `Vagas abertas em ${rec.areaLabel ?? "sua área"}` : "Outras sugestões para você"}
+          </h3>
           <p className="related__sub">
-            Encontramos {rec.total} sugestões compatíveis com as suas respostas. Estas são as mais próximas do seu perfil.
+            {rec.tipo === "portal"
+              ? `Encontramos ${rec.total} ${rec.total === 1 ? "vaga" : "vagas"} nessa área. Elas podem ter nível, formação ou local diferentes; confira os requisitos.`
+              : `Encontramos ${rec.total} sugestões compatíveis com as suas respostas. Estas são as mais próximas do seu perfil.`}
           </p>
           <div className="related__grid">
             {rec.relacionadas.map((r) => (
@@ -83,9 +92,9 @@ export function Result({ answers, onRestart }: Props) {
                   {r.motivos.length > 0 && (
                     <span className="related-card__why">{r.motivos.slice(0, 2).join(", ")}</span>
                   )}
-                  <span className="related-card__link">
+                  <a className="related-card__link" href={r.vaga.url} target="_blank" rel="noreferrer">
                     {r.vaga.tipo === "busca" ? "Abre a busca no portal Gupy" : shortUrl(r.vaga.url, 34)}
-                  </span>
+                  </a>
                 </div>
               </div>
             ))}
@@ -95,7 +104,7 @@ export function Result({ answers, onRestart }: Props) {
 
       <div className="result__foot">
         <span>
-          Todas as vagas: <strong>{shortUrl(PORTAL_VAGAS)}</strong>
+          Todas as {rec.catalogTotal} vagas: <strong>{shortUrl(PORTAL_VAGAS)}</strong>
         </span>
         <button type="button" className="btn btn--link" onClick={onRestart}>
           Refazer o teste

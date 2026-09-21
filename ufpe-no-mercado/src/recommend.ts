@@ -127,6 +127,48 @@ function avaliar(v: Vaga, a: Answers, p: Perfil, nivel?: NivelKey): Match | null
   return { vaga: v, score: s, motivos, tag: NIVEL_LABEL[nivelExibido(v, nivel)] };
 }
 
+/**
+ * Quando não existe combinação exata, recupera vagas da área escolhida sem
+ * chamá-las de compatíveis. Nível, curso, formação e local servem somente
+ * para colocar as alternativas mais próximas primeiro.
+ */
+function avaliarAlternativaDaArea(v: Vaga, a: Answers, p: Perfil, nivel?: NivelKey): Match | null {
+  if (v.pcd || !a.area || !v.areas.includes(a.area)) return null;
+
+  const motivos = ["Na área que você escolheu"];
+  let s = v.areas[0] === a.area ? 60 : 50;
+
+  if (nivel && v.niveis.includes(nivel)) {
+    s += 45;
+    motivos.push("No nível que você busca");
+  }
+  if (a.curso && v.cursos.includes(a.curso)) {
+    s += 35;
+    motivos.push("Combina com seu curso");
+  }
+  if (escolaridadeCompativel(v, p)) s += 20;
+
+  const cidadeOk =
+    p.cidade.length >= 3 &&
+    v.cidades.some((c) => norm(c).includes(p.cidade) || p.cidade.includes(norm(c)));
+  const regiaoOk = !cidadeOk && naRmr(p.cidade) && v.cidades.some((c) => naRmr(norm(c)));
+  if (cidadeOk) {
+    s += 45;
+    motivos.push("Na sua cidade");
+  } else if (regiaoOk) {
+    s += 35;
+    motivos.push("Na sua região (Grande Recife)");
+  } else if (a.uf && v.ufs.includes(a.uf)) {
+    s += 20;
+    motivos.push("No seu estado");
+  } else if (a.uf && v.ufs.length > 0) {
+    s -= 15;
+  }
+
+  if (v.tipo === "vaga") s += 10;
+  return { vaga: v, score: s, motivos, tag: NIVEL_LABEL[nivelExibido(v, nivel)] };
+}
+
 const PORTAL: Vaga = {
   id: "portal", ref: 0, titulo: "Portal de vagas: Grupo Moura", url: PORTAL_VAGAS, tipo: "busca",
   niveis: [], areas: [], local: "Todas as localidades", ufs: [], cidades: [],
@@ -146,21 +188,39 @@ export function recommend(a: Answers): Recommendation {
   const ranking = ranquear(nivel);
 
   // a mesma vaga aparece publicada várias vezes / em várias cidades: fica só a melhor de cada cargo
-  const vistos = new Set<string>();
-  const unicos = ranking.filter((m) => {
-    const k = `${chaveCargo(m.vaga)}|${m.vaga.niveis.join()}`;
-    return !vistos.has(k) && vistos.add(k);
-  });
+  const deduplicar = (itens: Match[]) => {
+    const vistos = new Set<string>();
+    return itens.filter((m) => {
+      const k = `${chaveCargo(m.vaga)}|${m.vaga.niveis.join()}`;
+      return !vistos.has(k) && vistos.add(k);
+    });
+  };
+  const unicos = deduplicar(ranking);
 
   const areaFiltroLabel = a.area ? AREA_LABEL[a.area] : undefined;
 
   if (unicos.length === 0) {
     const estagioSemMatricula = nivel === "estagio" && !p.tecnicoMatriculado && !p.superiorMatriculado;
+    const alternativasDaArea = deduplicar(
+      CATALOGO
+        .map((v) => avaliarAlternativaDaArea(v, a, p, nivel))
+        .filter((m): m is Match => m !== null)
+        .sort((x, y) => y.score - x.score || y.vaga.ref - x.vaga.ref),
+    );
+    const resumoArea = alternativasDaArea.length > 0
+      ? ` Há ${alternativasDaArea.length} ${alternativasDaArea.length === 1 ? "vaga aberta" : "vagas abertas"} em ${areaFiltroLabel}; veja as mais próximas abaixo.`
+      : "";
     return {
-      tipo: "portal", principal: PORTAL, motivos: [], relacionadas: [], total: 0, areaLabel: areaFiltroLabel,
+      tipo: "portal",
+      principal: PORTAL,
+      motivos: [],
+      relacionadas: alternativasDaArea.slice(0, MAX_RELACIONADAS),
+      total: alternativasDaArea.length,
+      catalogTotal: CATALOGO.length,
+      areaLabel: areaFiltroLabel,
       descricao: estagioSemMatricula
-        ? "Estágio exige matrícula ativa em curso técnico ou superior. Escaneie o QR code para conhecer outras oportunidades."
-        : "Não encontramos uma vaga que combine ao mesmo tempo com o nível, a área, a formação e o local informados. Escaneie o QR code para ver todas as vagas do Grupo Moura.",
+        ? `Estágio exige matrícula ativa em curso técnico ou superior.${resumoArea} O catálogo carregado tem ${CATALOGO.length} vagas no total.`
+        : `Não encontramos uma combinação exata para todos os filtros.${resumoArea} O catálogo carregado tem ${CATALOGO.length} vagas no total; use o QR code para consultar todas.`,
     };
   }
 
@@ -177,5 +237,6 @@ export function recommend(a: Answers): Recommendation {
     nivelLabel: top.tag,
     relacionadas: resto.slice(0, MAX_RELACIONADAS),
     total: unicos.length,
+    catalogTotal: CATALOGO.length,
   };
 }

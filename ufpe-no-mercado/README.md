@@ -45,7 +45,8 @@ corrija em `AJUSTES` pelo número da vaga.
 - `src/vagas.ts` — leitura da lista, `REGRAS` de classificação e `AJUSTES` pontuais
 - `src/recommend.ts` — filtra nível, área, formação e local antes de ordenar a sugestão
   principal e as 2 seguintes. Se não houver combinação válida, mostra o portal em vez de
-  forçar uma vaga incompatível (considera a Grande Recife como "sua região")
+  forçar uma vaga incompatível, além de listar separadamente vagas existentes na área
+  escolhida para conferência (considera a Grande Recife como "sua região")
 - `src/data.ts` — perguntas, textos, aviso de sugestão, tempo de inatividade e nº de vagas extras
 - `src/styles.css` — cores e tipografia (variáveis no topo)
 - `src/components/` — telas (Attract, VideoStep, Quiz, Result…)
