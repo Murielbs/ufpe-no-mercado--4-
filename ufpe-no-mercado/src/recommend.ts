@@ -1,7 +1,7 @@
 /**
  * MOTOR DE RECOMENDAÇÃO
- * Primeiro remove toda vaga incompatível com nível, área, formação e local.
- * A pontuação serve apenas para ordenar as vagas que passaram por todos os filtros.
+ * Primeiro remove toda vaga incompatível com nível, área, formação e curso.
+ * A localização serve como desempate entre as vagas que passaram por esses filtros.
  * Assim, uma pontuação alta nunca compensa uma resposta incompatível.
  */
 import { AREA_LABEL, MAX_RELACIONADAS, NIVEL_LABEL, PORTAL_VAGAS } from "./data";
@@ -42,7 +42,10 @@ function perfilDe(a: Answers): Perfil {
   const e = a.escolaridade;
   return {
     ensinoMedio: e.startsWith("Ensino Médio"),
-    medioConcluido: e !== "Ensino Médio em andamento",
+    medioConcluido: [
+      "Ensino Médio concluído", "Curso Técnico em andamento", "Curso Técnico concluído",
+      "Ensino Superior em andamento", "Ensino Superior concluído",
+    ].includes(e),
     tecnicoMatriculado: e === "Curso Técnico em andamento",
     tecnicoConcluido: e === "Curso Técnico concluído",
     superiorMatriculado: e === "Ensino Superior em andamento",
@@ -59,22 +62,8 @@ function escolaridadeCompativel(v: Vaga, p: Perfil): boolean {
   }
   if (v.niveis.includes("jovem")) return true;
   if (v.minEscolaridade === "superior") return p.superiorConcluido;
-  if (v.minEscolaridade === "tecnico") return p.tecnicoConcluido;
+  if (v.minEscolaridade === "tecnico") return p.tecnicoConcluido || p.superiorConcluido;
   return p.medioConcluido;
-}
-
-/**
- * Curso é requisito eliminatório quando a vaga é de estágio, técnica/superior
- * ou pertence a uma área especializada. Em cargos gerais de ensino médio,
- * ele só ajuda a ordenar porque normalmente não é requisito formal.
- */
-function exigeCursoCompativel(v: Vaga): boolean {
-  return v.cursos.length > 0 && (
-    v.niveis.includes("estagio") ||
-    v.minEscolaridade !== "medio" ||
-    v.areas.includes("tech") ||
-    v.areas.includes("engenharia")
-  );
 }
 
 function nivelExibido(v: Vaga, nivel?: NivelKey): NivelKey {
@@ -90,39 +79,38 @@ function avaliar(v: Vaga, a: Answers, p: Perfil, nivel?: NivelKey): Match | null
   if (nivel && !v.niveis.includes(nivel)) return null;
   if (!nivel && v.niveis.includes("jovem") && !p.ensinoMedio) return null;
   if (!escolaridadeCompativel(v, p)) return null;
-  if (a.area && !v.geral && !v.areas.includes(a.area)) return null;
-  if (exigeCursoCompativel(v) && !v.cursos.includes(a.curso)) return null;
-  if (a.uf && v.ufs.length > 0 && !v.ufs.includes(a.uf)) return null;
+  if (a.area && !v.areas.includes(a.area)) return null;
+  if (v.cursos.length > 0 && !v.cursos.includes(a.curso)) return null;
 
   const cidadeOk =
     p.cidade.length >= 3 &&
     v.cidades.some((c) => norm(c).includes(p.cidade) || p.cidade.includes(norm(c)));
   const regiaoOk = !cidadeOk && naRmr(p.cidade) && v.cidades.some((c) => naRmr(norm(c)));
-  if (p.cidade && !cidadeOk && !regiaoOk) return null;
+  const ufOk = !!a.uf && v.ufs.includes(a.uf);
 
   // ── Ordenação das vagas já compatíveis ──
-  if (nivel) { s += 50; motivos.push("No nível que você busca"); }
+  if (nivel) { s += 40; motivos.push("No nível que você busca"); }
 
   if (a.area) {
-    if (v.areas[0] === a.area) { s += 35; motivos.push("Na sua área de interesse"); }
-    else if (v.areas.includes(a.area)) { s += 25; motivos.push("Na sua área de interesse"); }
-    else if (v.geral) s += 8;
+    if (v.areas[0] === a.area) { s += 25; motivos.push("Na sua área de interesse"); }
+    else if (v.areas.includes(a.area)) { s += 15; motivos.push("Na sua área de interesse"); }
   }
 
   if (a.curso && v.cursos.includes(a.curso)) {
-    s += 25;
+    s += 50;
     motivos.push("Combina com seu curso");
   }
 
-  if (cidadeOk) { s += 45; motivos.push("Na sua cidade"); }
-  else if (regiaoOk) { s += 35; motivos.push("Na sua região (Grande Recife)"); }
-  else if (a.uf && v.ufs.includes(a.uf)) { s += 15; motivos.push("No seu estado"); }
+  // Localização serve como desempate: nunca esconde uma vaga adequada à formação.
+  if (cidadeOk && (!a.uf || ufOk)) { s += 5; motivos.push("Na sua cidade"); }
+  else if (regiaoOk && (!a.uf || ufOk)) { s += 4; motivos.push("Na sua região (Grande Recife)"); }
+  else if (ufOk) { s += 2; motivos.push("No seu estado"); }
 
   motivos.push("Compatível com sua escolaridade");
 
   // ── Precisão do link ──
-  if (v.tipo === "vaga") s += 15;
-  else if (v.tipo === "banco") s -= 5;
+  if (v.tipo === "vaga") s += 6;
+  else if (v.tipo === "banco") s -= 4;
 
   return { vaga: v, score: s, motivos, tag: NIVEL_LABEL[nivelExibido(v, nivel)] };
 }
@@ -136,36 +124,34 @@ function avaliarAlternativaDaArea(v: Vaga, a: Answers, p: Perfil, nivel?: NivelK
   if (v.pcd || !a.area || !v.areas.includes(a.area)) return null;
 
   const motivos = ["Na área que você escolheu"];
-  let s = v.areas[0] === a.area ? 60 : 50;
+  let s = v.areas[0] === a.area ? 25 : 15;
 
   if (nivel && v.niveis.includes(nivel)) {
-    s += 45;
+    s += 20;
     motivos.push("No nível que você busca");
   }
   if (a.curso && v.cursos.includes(a.curso)) {
-    s += 35;
+    s += 100;
     motivos.push("Combina com seu curso");
   }
-  if (escolaridadeCompativel(v, p)) s += 20;
+  if (escolaridadeCompativel(v, p)) s += 35;
 
   const cidadeOk =
     p.cidade.length >= 3 &&
     v.cidades.some((c) => norm(c).includes(p.cidade) || p.cidade.includes(norm(c)));
   const regiaoOk = !cidadeOk && naRmr(p.cidade) && v.cidades.some((c) => naRmr(norm(c)));
   if (cidadeOk) {
-    s += 45;
+    s += 5;
     motivos.push("Na sua cidade");
   } else if (regiaoOk) {
-    s += 35;
+    s += 4;
     motivos.push("Na sua região (Grande Recife)");
   } else if (a.uf && v.ufs.includes(a.uf)) {
-    s += 20;
+    s += 2;
     motivos.push("No seu estado");
-  } else if (a.uf && v.ufs.length > 0) {
-    s -= 15;
   }
 
-  if (v.tipo === "vaga") s += 10;
+  if (v.tipo === "vaga") s += 6;
   return { vaga: v, score: s, motivos, tag: NIVEL_LABEL[nivelExibido(v, nivel)] };
 }
 
@@ -208,7 +194,7 @@ export function recommend(a: Answers): Recommendation {
         .sort((x, y) => y.score - x.score || y.vaga.ref - x.vaga.ref),
     );
     const resumoArea = alternativasDaArea.length > 0
-      ? ` Há ${alternativasDaArea.length} ${alternativasDaArea.length === 1 ? "vaga aberta" : "vagas abertas"} em ${areaFiltroLabel}; veja as mais próximas abaixo.`
+      ? ` Há ${alternativasDaArea.length} ${alternativasDaArea.length === 1 ? "vaga cadastrada" : "vagas cadastradas"} em ${areaFiltroLabel}; veja as mais próximas abaixo.`
       : "";
     return {
       tipo: "portal",
@@ -219,8 +205,8 @@ export function recommend(a: Answers): Recommendation {
       catalogTotal: CATALOGO.length,
       areaLabel: areaFiltroLabel,
       descricao: estagioSemMatricula
-        ? `Estágio exige matrícula ativa em curso técnico ou superior.${resumoArea} O catálogo carregado tem ${CATALOGO.length} vagas no total.`
-        : `Não encontramos uma combinação exata para todos os filtros.${resumoArea} O catálogo carregado tem ${CATALOGO.length} vagas no total; use o QR code para consultar todas.`,
+        ? `Estágio exige matrícula ativa em curso técnico ou superior.${resumoArea} A lista usada neste teste tem ${CATALOGO.length} vagas; confira a disponibilidade no portal.`
+        : `Não encontramos vaga indicada para esta combinação de formação, curso, área e objetivo.${resumoArea} A lista usada neste teste tem ${CATALOGO.length} vagas; confira a disponibilidade no portal.`,
     };
   }
 
@@ -231,8 +217,8 @@ export function recommend(a: Answers): Recommendation {
     principal: top.vaga,
     motivos: top.motivos,
     descricao: nivel
-      ? `Encontramos esta ${FRASE[nivel]} compatível com as suas respostas.`
-      : "Com base nas suas respostas, esta é a nossa sugestão de vaga para você.",
+      ? `Encontramos esta ${FRASE[nivel]} compatível com sua formação, curso e área. Confira a localidade e os requisitos da vaga.`
+      : "Encontramos esta vaga compatível com sua formação, curso e área. Confira a localidade e os requisitos da vaga.",
     areaLabel: top.vaga.geral ? "Atuação geral" : AREA_LABEL[top.vaga.areas[0]],
     nivelLabel: top.tag,
     relacionadas: resto.slice(0, MAX_RELACIONADAS),

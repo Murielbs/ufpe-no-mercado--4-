@@ -54,7 +54,7 @@ export function Result({ answers, onRestart }: Props) {
             {shortUrl(rec.principal.url)}
           </a>
           {rec.tipo === "portal" && (
-            <div className="qr-note">Este QR code abre o portal com as {rec.catalogTotal} vagas do catálogo.</div>
+            <div className="qr-note">Este QR code abre o portal para conferir as oportunidades disponíveis.</div>
           )}
           {rec.principal.niveis.includes("jovem") && <div className="qr-note">{JOVEM_NOTA}</div>}
           {rec.principal.tipo === "busca" && rec.tipo === "vaga" && (
@@ -72,11 +72,11 @@ export function Result({ answers, onRestart }: Props) {
       {rec.relacionadas.length > 0 && (
         <section className="related">
           <h3 className="related__title">
-            {rec.tipo === "portal" ? `Vagas abertas em ${rec.areaLabel ?? "sua área"}` : "Outras sugestões para você"}
+            {rec.tipo === "portal" ? `Vagas do catálogo em ${rec.areaLabel ?? "sua área"}` : "Outras sugestões para você"}
           </h3>
           <p className="related__sub">
             {rec.tipo === "portal"
-              ? `Encontramos ${rec.total} ${rec.total === 1 ? "vaga" : "vagas"} nessa área. Elas podem ter nível, formação ou local diferentes; confira os requisitos.`
+              ? `Há ${rec.total} ${rec.total === 1 ? "vaga cadastrada" : "vagas cadastradas"} nessa área. Elas podem ter nível, formação ou local diferentes; confira os requisitos e a disponibilidade.`
               : `Encontramos ${rec.total} sugestões compatíveis com as suas respostas. Estas são as mais próximas do seu perfil.`}
           </p>
           <div className="related__grid">
@@ -104,7 +104,7 @@ export function Result({ answers, onRestart }: Props) {
 
       <div className="result__foot">
         <span>
-          Todas as {rec.catalogTotal} vagas: <strong>{shortUrl(PORTAL_VAGAS)}</strong>
+          Catálogo do teste: {rec.catalogTotal} vagas · Portal: <strong>{shortUrl(PORTAL_VAGAS)}</strong>
         </span>
         <button type="button" className="btn btn--link" onClick={onRestart}>
           Refazer o teste

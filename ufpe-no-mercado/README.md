@@ -8,6 +8,7 @@ pode ser encerrada.
 ```bash
 npm install
 npm run dev      # desenvolvimento
+npm test         # cruza todas as opções do quiz com estados e cidades do catálogo
 npm run build    # gera a pasta dist/ para publicar no totem
 ```
 
@@ -43,10 +44,13 @@ corrija em `AJUSTES` pelo número da vaga.
 ## Onde mexer
 - `src/vagas-lista.ts` — lista bruta de vagas (colar aqui a exportação do Gupy)
 - `src/vagas.ts` — leitura da lista, `REGRAS` de classificação e `AJUSTES` pontuais
-- `src/recommend.ts` — filtra nível, área, formação e local antes de ordenar a sugestão
-  principal e as 2 seguintes. Se não houver combinação válida, mostra o portal em vez de
+- `src/recommend.ts` — filtra nível, área, formação e curso; usa a localização apenas para
+  ordenar a sugestão principal e as 2 seguintes. Se não houver combinação válida, mostra o portal em vez de
   forçar uma vaga incompatível, além de listar separadamente vagas existentes na área
   escolhida para conferência (considera a Grande Recife como "sua região")
+- `scripts/test-recommend.cjs` — verifica todas as opções fechadas do formulário, todos os
+  estados e cada cidade/estado presente na lista de vagas; cidade digitada livremente não tem
+  um conjunto finito de respostas possíveis
 - `src/data.ts` — perguntas, textos, aviso de sugestão, tempo de inatividade e nº de vagas extras
 - `src/styles.css` — cores e tipografia (variáveis no topo)
 - `src/components/` — telas (Attract, VideoStep, Quiz, Result…)
