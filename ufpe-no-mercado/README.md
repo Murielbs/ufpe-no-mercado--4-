@@ -11,6 +11,18 @@ npm run dev      # desenvolvimento
 npm run build    # gera a pasta dist/ para publicar no totem
 ```
 
+## Deploy no GitHub Pages
+O deploy é automático a cada `push` na branch `main`. O workflow fica na raiz do repositório,
+em `.github/workflows/deploy-pages.yml`, porque este app está dentro da pasta
+`ufpe-no-mercado/`.
+
+Na primeira publicação, abra **Settings > Pages** no GitHub e selecione **GitHub Actions**
+em **Source**. Depois que a Action terminar, o site ficará disponível em:
+`https://murielbs.github.io/ufpe-no-mercado--4-/`.
+
+O `base: "./"` no Vite mantém os caminhos de arquivos corretos tanto no GitHub Pages quanto
+em uma hospedagem local.
+
 ## Arquivos que você precisa copiar para a pasta `public/`
 - `Imagem2.png` (logo)
 - `image_1657a3.jpg` (mascote)
