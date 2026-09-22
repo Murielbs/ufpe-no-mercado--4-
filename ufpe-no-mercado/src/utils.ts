@@ -6,7 +6,8 @@ export function isStepValid(step: Step, a: Answers): boolean {
     case "choice":
       return Boolean(a[step.field]);
     default:
-      return true; // local é opcional
+      // A localização pode ficar vazia; uma cidade precisa do UF para evitar homônimos.
+      return !a.cidade.trim() || Boolean(a.uf);
   }
 }
 

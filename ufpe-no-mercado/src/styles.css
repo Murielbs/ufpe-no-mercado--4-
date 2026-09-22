@@ -25,6 +25,39 @@
   --font-body: "IBM Plex Sans", system-ui, sans-serif;
 }
 
+/* Disponibilidade offline: aviso da equipe apenas na tela de espera. */
+.offline-status {
+  position: relative;
+  flex-shrink: 0;
+  align-self: center;
+  margin: .75rem .75rem max(.75rem, env(safe-area-inset-bottom));
+  width: max-content;
+  max-width: calc(100% - 1.5rem);
+  padding: .6rem 1rem;
+  border: 1px solid var(--line);
+  border-radius: .75rem;
+  background: #fff;
+  color: var(--ink);
+  box-shadow: 0 .25rem 1rem #14213f1a;
+  font-size: .875rem;
+  text-align: center;
+}
+.offline-status p { margin: 0; font-weight: 600; }
+.offline-status small { display: block; max-width: 38rem; font-size: .875rem; }
+.offline-status--ready p { color: var(--ok); }
+.offline-status--error p { color: var(--err); }
+.offline-status button {
+  min-height: 2.75rem;
+  margin-top: .4rem;
+  padding: .4rem .9rem;
+  border: 0;
+  border-radius: .5rem;
+  background: var(--navy);
+  color: #fff;
+  font: inherit;
+  cursor: pointer;
+}
+
 /*
   ESCALA RESPONSIVA — todo o layout usa rem.
   Celular/notebook: 16px · TV 48" Full HD: ~24px · TV 4K: ~48px.
@@ -383,8 +416,12 @@ body {
 }
 
 /* ---------- Tela de atração ---------- */
+.welcome {
+  position: fixed; inset: 0; z-index: 50; overflow: auto;
+  display: flex; flex-direction: column; background: var(--navy);
+}
 .attract {
-  position: fixed; inset: 0; z-index: 50; overflow: hidden;
+  position: relative; flex: 1 0 auto; overflow: hidden;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   padding: 2rem; text-align: center; cursor: pointer;
   color: #fff; background: var(--navy);

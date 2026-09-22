@@ -36,7 +36,7 @@ export function Result({ answers, onRestart }: Props) {
           )}
 
           <div className="mascot">
-            <img src="./image_1657a3.jpg" alt="Mascote Moura" onError={(e) => (e.currentTarget.style.display = "none")} />
+
             <p>
               {rec.tipo === "vaga"
                 ? "Esta é uma sugestão de vaga para o seu perfil. Escaneie para conhecer os detalhes e, se fizer sentido, se inscrever."
@@ -50,6 +50,7 @@ export function Result({ answers, onRestart }: Props) {
             <QRCodeSVG value={rec.principal.url} size={256} level="M" fgColor={QR_COLOR} bgColor="#ffffff" />
           </div>
           <div className="qr-hint">Aponte a câmera do celular</div>
+          <div className="qr-note">Para abrir a vaga e se candidatar, seu celular precisa de internet. Você pode fotografar o QR code para acessar depois.</div>
           <a className="link-box" href={rec.principal.url} target="_blank" rel="noreferrer">
             {shortUrl(rec.principal.url)}
           </a>
@@ -76,7 +77,7 @@ export function Result({ answers, onRestart }: Props) {
           </h3>
           <p className="related__sub">
             {rec.tipo === "portal"
-              ? `Há ${rec.total} ${rec.total === 1 ? "vaga cadastrada" : "vagas cadastradas"} nessa área. Elas podem ter nível, formação ou local diferentes; confira os requisitos e a disponibilidade.`
+              ? `Há ${rec.total} ${rec.total === 1 ? "vaga cadastrada" : "vagas cadastradas"} nessa área. Elas podem exigir outro nível, curso ou formação; confira os requisitos e a disponibilidade.`
               : `Encontramos ${rec.total} sugestões compatíveis com as suas respostas. Estas são as mais próximas do seu perfil.`}
           </p>
           <div className="related__grid">

@@ -1,7 +1,7 @@
 /**
  * MOTOR DE RECOMENDAÇÃO
- * Primeiro remove toda vaga incompatível com nível, área, formação e curso.
- * A localização serve como desempate entre as vagas que passaram por esses filtros.
+ * Primeiro remove toda vaga incompatível com nível, área, formação, curso e local.
+ * Na Grande Recife, a cidade exata vem antes das outras cidades da região.
  * Assim, uma pontuação alta nunca compensa uma resposta incompatível.
  */
 import { AREA_LABEL, MAX_RELACIONADAS, NIVEL_LABEL, PORTAL_VAGAS } from "./data";
@@ -16,14 +16,20 @@ const FRASE: Record<NivelKey, string> = {
 };
 
 const norm = (s: string) =>
-  s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+  s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim().replace(/\s+/g, " ");
 
-/** Cidades da Região Metropolitana do Recife: vaga em uma delas é "na sua região" para quem mora em outra. */
-const RMR = [
+// Fonte: Grande Recife, Anuário Estatístico do STPP/RMR 2024 (14 municípios).
+// https://www.granderecife.pe.gov.br/wp-content/uploads/2026/03/Anuario_Estatistico_do_STPP_RMR_2024_V1.0.pdf
+const RMR = new Set([
   "recife", "jaboatao dos guararapes", "olinda", "cabo de santo agostinho", "paulista", "camaragibe",
-  "sao lourenco da mata", "igarassu", "abreu e lima", "ipojuca", "moreno", "itapissuma",
-];
-const naRmr = (c: string) => c.length >= 3 && RMR.some((r) => r === c || r.includes(c));
+  "sao lourenco da mata", "igarassu", "abreu e lima", "ipojuca", "moreno", "itapissuma", "aracoiaba", "ilha de itamaraca",
+]);
+function cidadeNormalizada(cidade: string): string {
+  const nome = norm(cidade);
+  if (nome === "jaboatao") return "jaboatao dos guararapes";
+  if (nome === "itamaraca") return "ilha de itamaraca";
+  return nome;
+}
 
 /** Chave para juntar a mesma vaga publicada várias vezes (ex.: 6 postagens de "Auxiliar Técnico – RSM PR"). */
 const chaveCargo = (v: Vaga) => norm(v.titulo).replace(/[^a-z0-9]/g, "");
@@ -36,6 +42,7 @@ interface Perfil {
   superiorMatriculado: boolean;
   superiorConcluido: boolean;
   cidade: string;
+  uf: string;
 }
 
 function perfilDe(a: Answers): Perfil {
@@ -50,8 +57,26 @@ function perfilDe(a: Answers): Perfil {
     tecnicoConcluido: e === "Curso Técnico concluído",
     superiorMatriculado: e === "Ensino Superior em andamento",
     superiorConcluido: e === "Ensino Superior concluído",
-    cidade: norm(a.cidade),
+    cidade: cidadeNormalizada(a.cidade),
+    uf: norm(a.uf),
   };
+}
+
+/** -1 exclui a vaga; cidade exata precede região, estado e busca nacional. */
+function prioridadeLocal(v: Vaga, p: Perfil): number {
+  if (p.cidade && !p.uf) return -1; // sem UF, não é possível distinguir cidades homônimas
+  if (p.uf && !v.ufs.some((uf) => norm(uf) === p.uf)) return -1;
+  if (!p.cidade) return p.uf ? 1 : 0;
+  const cidades = v.cidades.map(cidadeNormalizada);
+  if (cidades.includes(p.cidade)) return 3;
+  if (p.uf === "pernambuco" && RMR.has(p.cidade) && cidades.some((cidade) => RMR.has(cidade))) return 2;
+  return -1;
+}
+
+function motivoLocal(prioridade: number): string | undefined {
+  if (prioridade === 3) return "Na sua cidade";
+  if (prioridade === 2) return "Na sua região (Grande Recife)";
+  if (prioridade === 1) return "No seu estado";
 }
 
 /** Estágio exige matrícula ativa; os demais níveis exigem a formação mínima concluída. */
@@ -82,11 +107,8 @@ function avaliar(v: Vaga, a: Answers, p: Perfil, nivel?: NivelKey): Match | null
   if (a.area && !v.areas.includes(a.area)) return null;
   if (v.cursos.length > 0 && !v.cursos.includes(a.curso)) return null;
 
-  const cidadeOk =
-    p.cidade.length >= 3 &&
-    v.cidades.some((c) => norm(c).includes(p.cidade) || p.cidade.includes(norm(c)));
-  const regiaoOk = !cidadeOk && naRmr(p.cidade) && v.cidades.some((c) => naRmr(norm(c)));
-  const ufOk = !!a.uf && v.ufs.includes(a.uf);
+  const local = prioridadeLocal(v, p);
+  if (local < 0) return null;
 
   // ── Ordenação das vagas já compatíveis ──
   if (nivel) { s += 40; motivos.push("No nível que você busca"); }
@@ -101,10 +123,8 @@ function avaliar(v: Vaga, a: Answers, p: Perfil, nivel?: NivelKey): Match | null
     motivos.push("Combina com seu curso");
   }
 
-  // Localização serve como desempate: nunca esconde uma vaga adequada à formação.
-  if (cidadeOk && (!a.uf || ufOk)) { s += 5; motivos.push("Na sua cidade"); }
-  else if (regiaoOk && (!a.uf || ufOk)) { s += 4; motivos.push("Na sua região (Grande Recife)"); }
-  else if (ufOk) { s += 2; motivos.push("No seu estado"); }
+  const localLabel = motivoLocal(local);
+  if (localLabel) motivos.push(localLabel);
 
   motivos.push("Compatível com sua escolaridade");
 
@@ -117,11 +137,13 @@ function avaliar(v: Vaga, a: Answers, p: Perfil, nivel?: NivelKey): Match | null
 
 /**
  * Quando não existe combinação exata, recupera vagas da área escolhida sem
- * chamá-las de compatíveis. Nível, curso, formação e local servem somente
- * para colocar as alternativas mais próximas primeiro.
+ * chamá-las de compatíveis. A localização continua obrigatória; nível, curso
+ * e formação servem para ordenar as alternativas dentro da mesma localidade.
  */
 function avaliarAlternativaDaArea(v: Vaga, a: Answers, p: Perfil, nivel?: NivelKey): Match | null {
   if (v.pcd || !a.area || !v.areas.includes(a.area)) return null;
+  const local = prioridadeLocal(v, p);
+  if (local < 0) return null;
 
   const motivos = ["Na área que você escolheu"];
   let s = v.areas[0] === a.area ? 25 : 15;
@@ -136,20 +158,8 @@ function avaliarAlternativaDaArea(v: Vaga, a: Answers, p: Perfil, nivel?: NivelK
   }
   if (escolaridadeCompativel(v, p)) s += 35;
 
-  const cidadeOk =
-    p.cidade.length >= 3 &&
-    v.cidades.some((c) => norm(c).includes(p.cidade) || p.cidade.includes(norm(c)));
-  const regiaoOk = !cidadeOk && naRmr(p.cidade) && v.cidades.some((c) => naRmr(norm(c)));
-  if (cidadeOk) {
-    s += 5;
-    motivos.push("Na sua cidade");
-  } else if (regiaoOk) {
-    s += 4;
-    motivos.push("Na sua região (Grande Recife)");
-  } else if (a.uf && v.ufs.includes(a.uf)) {
-    s += 2;
-    motivos.push("No seu estado");
-  }
+  const localLabel = motivoLocal(local);
+  if (localLabel) motivos.push(localLabel);
 
   if (v.tipo === "vaga") s += 6;
   return { vaga: v, score: s, motivos, tag: NIVEL_LABEL[nivelExibido(v, nivel)] };
@@ -164,12 +174,19 @@ const PORTAL: Vaga = {
 export function recommend(a: Answers): Recommendation {
   const nivel: NivelKey | undefined = a.busca && a.busca !== "conhecer" ? a.busca : undefined;
   const p = perfilDe(a);
+  const ordenar = (x: Match, y: Match) =>
+    prioridadeLocal(y.vaga, p) - prioridadeLocal(x.vaga, p) || y.score - x.score || y.vaga.ref - x.vaga.ref;
+  const localDescricao = p.cidade
+    ? p.uf === "pernambuco" && RMR.has(p.cidade)
+      ? `em ${a.cidade.trim()} ou na Grande Recife (Pernambuco)`
+      : `em ${a.cidade.trim()}${p.uf ? ` (${a.uf})` : ""}`
+    : p.uf ? `em ${a.uf}` : "";
 
   const ranquear = (n?: NivelKey) =>
     CATALOGO
       .map((v) => avaliar(v, a, p, n))
       .filter((m): m is Match => m !== null)
-      .sort((x, y) => y.score - x.score || y.vaga.ref - x.vaga.ref); // empate: a mais recente
+      .sort(ordenar); // mesma localidade e pontuação: a mais recente
 
   const ranking = ranquear(nivel);
 
@@ -191,10 +208,10 @@ export function recommend(a: Answers): Recommendation {
       CATALOGO
         .map((v) => avaliarAlternativaDaArea(v, a, p, nivel))
         .filter((m): m is Match => m !== null)
-        .sort((x, y) => y.score - x.score || y.vaga.ref - x.vaga.ref),
+        .sort(ordenar),
     );
     const resumoArea = alternativasDaArea.length > 0
-      ? ` Há ${alternativasDaArea.length} ${alternativasDaArea.length === 1 ? "vaga cadastrada" : "vagas cadastradas"} em ${areaFiltroLabel}; veja as mais próximas abaixo.`
+      ? ` Há ${alternativasDaArea.length} ${alternativasDaArea.length === 1 ? "vaga cadastrada" : "vagas cadastradas"} em ${areaFiltroLabel}${localDescricao ? ` ${localDescricao}` : ""}; as alternativas abaixo podem exigir outro nível, curso ou formação.`
       : "";
     return {
       tipo: "portal",
@@ -204,9 +221,7 @@ export function recommend(a: Answers): Recommendation {
       total: alternativasDaArea.length,
       catalogTotal: CATALOGO.length,
       areaLabel: areaFiltroLabel,
-      descricao: estagioSemMatricula
-        ? `Estágio exige matrícula ativa em curso técnico ou superior.${resumoArea} A lista usada neste teste tem ${CATALOGO.length} vagas; confira a disponibilidade no portal.`
-        : `Não encontramos vaga indicada para esta combinação de formação, curso, área e objetivo.${resumoArea} A lista usada neste teste tem ${CATALOGO.length} vagas; confira a disponibilidade no portal.`,
+      descricao: `Não encontramos vaga compatível com seu perfil${localDescricao ? ` ${localDescricao}` : ""}.${estagioSemMatricula ? " Estágio exige matrícula ativa em curso técnico ou superior." : ""}${p.cidade && !p.uf ? " Informe também o estado para identificar a localidade." : ""}${resumoArea} A lista usada neste teste tem ${CATALOGO.length} vagas; confira a disponibilidade no portal.`,
     };
   }
 

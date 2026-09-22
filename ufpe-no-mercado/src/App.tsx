@@ -5,6 +5,7 @@ import { Quiz } from "./components/Quiz";
 import { Result } from "./components/Result";
 import { Splash } from "./components/Splash";
 import { VideoStep } from "./components/VideoStep";
+import { OfflineStatus } from "./components/OfflineStatus";
 import { IDLE_MS, INITIAL_ANSWERS, STEPS } from "./data";
 import { useFitToScreen, useIdle } from "./hooks";
 import type { Answers } from "./types";
@@ -88,7 +89,10 @@ export default function App() {
         </main>
       )}
 
-      {phase === "attract" && <Attract onStart={() => setPhase("video")} />}
+      <div className={phase === "attract" ? "welcome" : undefined}>
+        {phase === "attract" && <Attract onStart={() => setPhase("video")} />}
+        <OfflineStatus visible={phase === "attract" && booted} />
+      </div>
     </>
   );
 }

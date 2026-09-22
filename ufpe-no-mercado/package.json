@@ -5,9 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "npm test && tsc --noEmit && vite build",
+    "build": "npm test && tsc --noEmit && vite build && node scripts/build-pwa.mjs",
     "preview": "vite preview",
-    "test": "node scripts/test-recommend.cjs"
+    "test": "node scripts/test-recommend.cjs && node --test scripts/test-pwa.cjs"
   },
   "dependencies": {
     "qrcode.react": "^4.2.0",

@@ -65,7 +65,7 @@ export function Quiz({ step, answers, setAnswer, isLast, onNext, onBack }: Props
         <div className="local-grid">
           <div className="field">
             <label className="field__label" htmlFor="uf">Estado (UF)</label>
-            <select id="uf" className="input" value={answers.uf} onChange={(e) => setAnswer("uf", e.target.value)}>
+            <select id="uf" className="input" value={answers.uf} required={Boolean(answers.cidade.trim())} onChange={(e) => setAnswer("uf", e.target.value)}>
               <option value="">Selecione</option>
               {ESTADOS_BR.map((uf) => (
                 <option key={uf} value={uf}>{uf}</option>
@@ -81,6 +81,10 @@ export function Quiz({ step, answers, setAnswer, isLast, onNext, onBack }: Props
             />
           </div>
         </div>
+      )}
+
+      {step.kind === "local" && answers.cidade.trim() && !answers.uf && (
+        <p className="local-hint" role="status">Selecione também o estado para buscar vagas na cidade informada.</p>
       )}
 
       <div className="nav">
