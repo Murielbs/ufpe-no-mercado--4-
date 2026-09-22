@@ -243,7 +243,6 @@ ESTÁGIO EM ADMINISTRAÇÃO Belo Jardim - PE Estágio | https://grupomoura.gupy.
 ESTÁGIO EM ADMINISTRAÇÃO OU CIÊNCIA CONTÁBEIS Belo Jardim - PE Estágio | https://grupomoura.gupy.io/jobs/11600246
 ESTÁGIO EM ATRAÇÃO E SELEÇÃO | RECIFE - PE Recife - PE Estágio | https://redemoura.gupy.io/jobs/11707207
 ESTÁGIO EM ENGENHARIA Belo Jardim - PE Estágio | https://grupomoura.gupy.io/jobs/11496349
-ESTÁGIO EM INTELIGÊNCIA ARTIFICIAL Recife - PE Estágio | https://grupomoura.gupy.io/jobs/11618408
 ESTAGIO EM RESPONSABILIDADE SOCIAL (PROJETOS SOCIOAMBIENTAIS) Belo Jardim - PE Estágio | https://grupomoura.gupy.io/jobs/11319937
 ESTÁGIO FINANCEIRO (ADQUIRÊNCIA FINANCEIRA) | RECIFE - PE Recife - PE Estágio | https://redemoura.gupy.io/jobs/11970515
 ESTÁGIO TÉCNICO Itapetininga - SP Estágio | https://grupomoura.gupy.io/jobs/11639724
