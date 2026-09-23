@@ -9,6 +9,7 @@
  * (nível, área, cursos, escolaridade). Ajustes pontuais ficam em AJUSTES, no vagas.ts.
  */
 export const LISTA_BRUTA = `
+ESTÁGIO - CONTROLADORIA Recife - PE Estágio | https://redemoura.gupy.io/jobs/12417739?jobBoardSource=gupy_public_page
 [ RSM RS] ESTAGIÁRIO(A) COMERCIAL Canoas - RS Estágio | https://grupomoura.gupy.io/jobs/12281612
 [RSM PE] ASSISTENTE TÉCNICO Jaboatão dos Guararapes - PE Efetivo | https://grupomoura.gupy.io/jobs/12198134
 AJUDANTE DE MOTORISTA - CARGA E DESCARGA Diadema - SP Efetivo | https://redemoura.gupy.io/jobs/12213104

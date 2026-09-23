@@ -1,6 +1,6 @@
 import type { Answers, AreaKey, NivelKey, Option, Step } from "./types";
 
-export const PORTAL_VAGAS = "https://grupomoura.gupy.io/";
+export const PORTAL_VAGAS = "https://www.moura.com.br/carreiras";
 
 /** Reinicia sozinho após 2 min sem toque (totem/TV de evento). */
 export const IDLE_MS = 120_000;

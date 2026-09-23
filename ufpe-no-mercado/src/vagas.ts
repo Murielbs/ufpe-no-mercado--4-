@@ -44,6 +44,7 @@ const norm = (s: string) =>
 // Texto comparado: título limpo, sem acento e em minúsculas.
 type Regra = [RegExp, AreaKey[], string[]];
 const REGRAS: Regra[] = [
+  [/^estagio.*controladoria$/, ["admfin"], [CONT]],
   // Jovem Aprendiz
   [/jovem aprendiz.*(administrativ|financeiro)/, ["admfin"], []],
   [/jovem aprendiz.*logistica/, ["logistica"], []],
